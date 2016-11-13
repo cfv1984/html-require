@@ -15,6 +15,7 @@ var Watcher = (function () {
             var DOM = imported["data-imported"];
             var scripts = DOM.querySelectorAll('script');
             imported.parentNode.replaceChild(DOM, imported);
+            [].slice.call(document.querySelector('link[rel="stylesheet"]')).forEach(function (l) { return document.head.appendChild(l); });
             [].slice.call(scripts).forEach(function (script) {
                 var g = document.createElement('script');
                 var s = document.getElementsByTagName('script')[0];
