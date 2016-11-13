@@ -5,7 +5,7 @@ type XHROptions = {
 };
 
 const _ = require('./util/DOM');
-
+const $ = _.DOM.$;
 
 export default class Watcher
 {
@@ -25,7 +25,7 @@ export default class Watcher
 
 
   private _getUnresolvedLinks(){
-    return _.$('[data-import]',true).filter(n => !n.hasAttribute('data-import-resolved'));
+    return $('[data-import]',true).filter(n => !n.hasAttribute('data-import-resolved'));
   }
 
 
@@ -51,24 +51,25 @@ export default class Watcher
     link.setAttribute('data-import-resolved','data-import-resolved');
   }
 
-  private getRemote(url, options?: XHROptions): Promise<string|Object>{
+  private getRemote(url, options?: XHROptions): Promise<string|Object>
+  {
     options = options || {};
-    return new Promise<string|Object>((ok:GenericPromiseHandler, fail:GenericPromiseHandler) => {
+    return new Promise<string|Object>((ok:GenericPromiseHandler, fail:GenericPromiseHandler) =>
+    {
       var request = new XMLHttpRequest();
       request.open('GET', url, true);
 
-      request.onreadystatechange = function() {
-        if (this.readyState === 4) {
-          if (this.status >= 200 && this.status < 400) {
+      request.onreadystatechange = function()
+      {
+        if (this.readyState === 4)
+        {
+          if (this.status >= 200 && this.status < 400)
+          {
             data = this.responseText;
-            if(options.json){
-              var data = JSON.parse(this.responseText);
-            }
+            if(options.json){ var data = JSON.parse(this.responseText) }
             ok(data);
           }
-          else {
-            fail(this)
-          }
+          else { fail(this) }
         }
       };
 
@@ -96,20 +97,22 @@ export default class Watcher
 
   private _onImportResolved = function(evt)
   {
-    var imported = evt.detail;
-    var DOM      = imported["data-imported"];
-    var scripts = DOM.querySelectorAll('script');
+    const imported = evt.detail;
+    const DOM      = imported["data-imported"];
+    const scripts  = DOM.querySelectorAll('script');
+    const styles   = document.querySelector('link[rel="stylesheet"]');
     imported.parentNode.replaceChild(DOM, imported);
 
-    [].slice.call(document.querySelector('link[rel="stylesheet"]')).forEach(l=>document.head.appendChild(l));
-    [].slice.call(scripts).forEach(function(script)
-    {
-      var g  = document.createElement('script');
-      var s  = document.getElementsByTagName('script')[0];
-      g.text = script.innerHTML;
-      s.parentNode.insertBefore(g, s);
-    });
+    _.toArray(styles).forEach(l=>document.head.appendChild(l));
+    _.toArray(scripts).forEach(this._moveScriptTag);
+  };
 
+  private _moveScriptTag = (script) =>
+  {
+    var g  = document.createElement('script');
+    var s  = document.getElementsByTagName('script')[0];
+    g.text = script.innerHTML;
+    s.parentNode.insertBefore(g, s);
   };
 
 }

@@ -1,5 +1,6 @@
 "use strict";
 var _ = require('./util/DOM');
+var $ = _.DOM.$;
 var Watcher = (function () {
     function Watcher(root, _resolved) {
         if (_resolved === void 0) { _resolved = []; }
@@ -14,14 +15,16 @@ var Watcher = (function () {
             var imported = evt.detail;
             var DOM = imported["data-imported"];
             var scripts = DOM.querySelectorAll('script');
+            var styles = document.querySelector('link[rel="stylesheet"]');
             imported.parentNode.replaceChild(DOM, imported);
-            [].slice.call(document.querySelector('link[rel="stylesheet"]')).forEach(function (l) { return document.head.appendChild(l); });
-            [].slice.call(scripts).forEach(function (script) {
-                var g = document.createElement('script');
-                var s = document.getElementsByTagName('script')[0];
-                g.text = script.innerHTML;
-                s.parentNode.insertBefore(g, s);
-            });
+            _.toArray(styles).forEach(function (l) { return document.head.appendChild(l); });
+            _.toArray(scripts).forEach(this._moveScriptTag);
+        };
+        this._moveScriptTag = function (script) {
+            var g = document.createElement('script');
+            var s = document.getElementsByTagName('script')[0];
+            g.text = script.innerHTML;
+            s.parentNode.insertBefore(g, s);
         };
         if (!document.documentElement["import-listener"]) {
             document.documentElement["import-listener"] = this._onImportResolved;
@@ -29,7 +32,7 @@ var Watcher = (function () {
         }
     }
     Watcher.prototype._getUnresolvedLinks = function () {
-        return _.$('[data-import]', true).filter(function (n) { return !n.hasAttribute('data-import-resolved'); });
+        return $('[data-import]', true).filter(function (n) { return !n.hasAttribute('data-import-resolved'); });
     };
     Watcher.prototype._loadLink = function (link) {
         var _this = this;
