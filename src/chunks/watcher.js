@@ -1,6 +1,6 @@
 "use strict";
-var _ = require('./util/DOM');
-var $ = _.DOM.$;
+var slice = [].slice;
+var rando = function () { return Math.ceil(Math.random() * 1024); };
 var Watcher = (function () {
     function Watcher(root, _resolved) {
         if (_resolved === void 0) { _resolved = []; }
@@ -17,14 +17,15 @@ var Watcher = (function () {
             var scripts = DOM.querySelectorAll('script');
             var styles = document.querySelector('link[rel="stylesheet"]');
             imported.parentNode.replaceChild(DOM, imported);
-            _.toArray(styles).forEach(function (l) { return document.head.appendChild(l); });
-            _.toArray(scripts).forEach(this._moveScriptTag);
+            slice.call(styles).forEach(function (l) { return document.head.appendChild(l); });
+            [].slice.call(scripts).forEach(this._moveScriptTag);
         };
         this._moveScriptTag = function (script) {
             var g = document.createElement('script');
             var s = document.getElementsByTagName('script')[0];
             g.text = script.innerHTML;
             s.parentNode.insertBefore(g, s);
+            script.parentNode && script.parentNode.removeChild(script);
         };
         if (!document.documentElement["import-listener"]) {
             document.documentElement["import-listener"] = this._onImportResolved;
@@ -32,7 +33,7 @@ var Watcher = (function () {
         }
     }
     Watcher.prototype._getUnresolvedLinks = function () {
-        return $('[data-import]', true).filter(function (n) { return !n.hasAttribute('data-import-resolved'); });
+        return slice.call(document.querySelectorAll('[data-import]')).filter(function (n) { return !n.hasAttribute('data-import-resolved'); });
     };
     Watcher.prototype._loadLink = function (link) {
         var _this = this;
@@ -77,7 +78,7 @@ var Watcher = (function () {
     Watcher.prototype._getDocumentFor = function (imported) {
         var df = document.createDocumentFragment();
         var parent = document.createElement('import');
-        parent["id"] = 'import-' + Date.now() + Math.ceil(Math.random() * 1024) + Math.ceil(Math.random() * 1024) + Math.ceil(Math.random() * 1024);
+        parent["id"] = 'import-' + Date.now() + rando() + rando() + rando();
         df.appendChild(parent);
         parent.innerHTML = imported;
         return df;

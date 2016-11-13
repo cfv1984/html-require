@@ -4,8 +4,9 @@ type XHROptions = {
   json?: boolean;
 };
 
-const _ = require('./util/DOM');
-const $ = _.DOM.$;
+var slice = [].slice;
+
+var rando = () => Math.ceil(Math.random()*1024);
 
 export default class Watcher
 {
@@ -25,9 +26,8 @@ export default class Watcher
 
 
   private _getUnresolvedLinks(){
-    return $('[data-import]',true).filter(n => !n.hasAttribute('data-import-resolved'));
+    return slice.call(document.querySelectorAll('[data-import]')).filter(n => !n.hasAttribute('data-import-resolved'));
   }
-
 
   private _loadLink(link:HTMLLinkElement){
     const path = link.getAttribute('data-import');
@@ -80,9 +80,9 @@ export default class Watcher
 
   private _getDocumentFor(imported): DocumentFragment
   {
-    var df = document.createDocumentFragment();
+    var df     = document.createDocumentFragment();
     var parent = document.createElement('import');
-    parent["id"] = 'import-' + Date.now()+ Math.ceil(Math.random()*1024)+ Math.ceil(Math.random()*1024)+ Math.ceil(Math.random()*1024);
+    parent["id"] = 'import-' + Date.now()+ rando() + rando() + rando();
     df.appendChild(parent);
     parent.innerHTML = imported;
     return df;
@@ -97,14 +97,15 @@ export default class Watcher
 
   private _onImportResolved = function(evt)
   {
-    const imported = evt.detail;
-    const DOM      = imported["data-imported"];
-    const scripts  = DOM.querySelectorAll('script');
-    const styles   = document.querySelector('link[rel="stylesheet"]');
+    var imported = evt.detail;
+    var DOM      = imported["data-imported"];
+    var scripts  = DOM.querySelectorAll('script');
+    var styles   = document.querySelector('link[rel="stylesheet"]');
     imported.parentNode.replaceChild(DOM, imported);
 
-    _.toArray(styles).forEach(l=>document.head.appendChild(l));
-    _.toArray(scripts).forEach(this._moveScriptTag);
+    slice.call(styles).forEach(l=>document.head.appendChild(l));
+    [].slice.call(scripts).forEach(this._moveScriptTag);
+
   };
 
   private _moveScriptTag = (script) =>
@@ -113,6 +114,7 @@ export default class Watcher
     var s  = document.getElementsByTagName('script')[0];
     g.text = script.innerHTML;
     s.parentNode.insertBefore(g, s);
+    script.parentNode && script.parentNode.removeChild(script);
   };
 
 }
