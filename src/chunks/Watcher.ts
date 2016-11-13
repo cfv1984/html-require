@@ -101,6 +101,7 @@ export default class Watcher
     var scripts = DOM.querySelectorAll('script');
     imported.parentNode.replaceChild(DOM, imported);
 
+    [].slice.call(document.querySelector('link[rel="stylesheet"]')).forEach(l=>document.head.appendChild(l));
     [].slice.call(scripts).forEach(function(script)
     {
       var g  = document.createElement('script');
