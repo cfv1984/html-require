@@ -95,7 +95,7 @@ export default class Watcher
     document.documentElement.dispatchEvent(evt);
   }
 
-  private _onImportResolved = function(evt)
+  private _onImportResolved = (evt) => 
   {
     var imported = evt.detail;
     var DOM      = imported["data-imported"];

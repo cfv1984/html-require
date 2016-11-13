@@ -18,7 +18,7 @@ var Watcher = (function () {
             var styles = document.querySelector('link[rel="stylesheet"]');
             imported.parentNode.replaceChild(DOM, imported);
             slice.call(styles).forEach(function (l) { return document.head.appendChild(l); });
-            [].slice.call(scripts).forEach(this._moveScriptTag);
+            [].slice.call(scripts).forEach(_this._moveScriptTag);
         };
         this._moveScriptTag = function (script) {
             var g = document.createElement('script');
