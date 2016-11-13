@@ -56,7 +56,7 @@ export default class Watcher
     options = options || {};
     return new Promise<string|Object>((ok:GenericPromiseHandler, fail:GenericPromiseHandler) =>
     {
-      var request = new XMLHttpRequest();
+      let request = new XMLHttpRequest();
       request.open('GET', url, true);
 
       request.onreadystatechange = function()
@@ -80,8 +80,8 @@ export default class Watcher
 
   private _getDocumentFor(imported): DocumentFragment
   {
-    var df     = document.createDocumentFragment();
-    var parent = document.createElement('import');
+    const df     = document.createDocumentFragment();
+    const parent = document.createElement('import');
     parent["id"] = 'import-' + Date.now()+ rando() + rando() + rando();
     df.appendChild(parent);
     parent.innerHTML = imported;
@@ -89,18 +89,18 @@ export default class Watcher
   }
 
   public informLoaded(link){
-    var evt = new CustomEvent('importResolved', {
+    const evt = new CustomEvent('importResolved', {
       detail: link
     });
     document.documentElement.dispatchEvent(evt);
   }
 
-  private _onImportResolved = (evt) => 
+  private _onImportResolved = (evt) =>
   {
-    var imported = evt.detail;
-    var DOM      = imported["data-imported"];
-    var scripts  = DOM.querySelectorAll('script');
-    var styles   = document.querySelector('link[rel="stylesheet"]');
+    const imported = evt.detail;
+    const DOM      = imported["data-imported"];
+    const scripts  = DOM.querySelectorAll('script');
+    const styles   = document.querySelector('link[rel="stylesheet"]');
     imported.parentNode.replaceChild(DOM, imported);
 
     slice.call(styles).forEach(l=>document.head.appendChild(l));
