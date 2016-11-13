@@ -2,8 +2,7 @@
 require('./chunks/util/polyfill');
 
 import Watcher from "./chunks/Watcher";
-var Promise = require('Promise');
-window["Promise"] = Promise;
+window["Promise"] = window["Promise"] || require('Promise');
 
 const w = new Watcher(document.documentElement);
 w.monitor();
