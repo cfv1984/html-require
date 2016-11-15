@@ -107,15 +107,18 @@ export default class Watcher
   private _loadResponse(path, response)
   {
     const type = PathTypeSniffer.getType(path);
+    let node;
     if(type === 'html'){
-      return this._injector.loadMarkup(response);
+      node = this._injector.loadMarkup(response);
     }
     if(type === 'js'){
-      return this._injector.loadJS(response);
+      node = this._injector.loadJS(response);
     }
     if(type === 'css'){
-      return this._injector.loadCSS(response);
+      node = this._injector.loadCSS(response);
     }
+
+    return node;
   }
 
   private _moveScriptTag = (script) =>
