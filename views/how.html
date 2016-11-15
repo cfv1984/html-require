@@ -1,15 +1,14 @@
 <section id=how-does-this-work>
   <h2>How does any of this work?</h2>
   <p>
-    You just declare a require like this: <pre><code>&lt;link data-import="./views/contents.html"&gt;</code></pre> and you're set!
-  </p>
-  <p>
-    We look for any tags with an <code>data-import</code> attribute, which HAS to resolve to something.
+    You just declare a require like this: <code>&lt;link data-import="./views/contents.html"&gt;</code> and you're set! </p>
+    <p>
+      Internally what's going on is, we look for any tags with an <code>data-import</code> attribute, which HAS to resolve to something.
   </p>
   <p>
     Then we grab the contents of that file, and replace the thing that had this import with its contents
   </p>
-  <p><code>Script</code>s get relocated to a safer place where they can run after the HTML was placed, and <code>stylesheets</code> all go to the head</p>
+  <p>Scripts get relocated to a safer place where they can run after the HTML was placed, and <code>stylesheets</code> all go to the head</p>
   <p>That's all there is to it! Include the script, and start using imports</p>
   <p>
     It also works asynchronously; click <a href="example" id="loadAsyncExample"> to load a new file</a> by appending a new special link to the end of this paragraph.
