@@ -1,12 +1,14 @@
 "use strict";
+var PathTypeSniffer_1 = require("./util/PathTypeSniffer");
+var ResourceInjector_1 = require("./util/ResourceInjector");
 var slice = [].slice;
-var rando = function () { return Math.ceil(Math.random() * 1024); };
 var Watcher = (function () {
     function Watcher(root, _resolved) {
         if (_resolved === void 0) { _resolved = []; }
         var _this = this;
         this.root = root;
         this._resolved = _resolved;
+        this._injector = new ResourceInjector_1.default();
         this.monitor = function () {
             _this._getUnresolvedLinks().forEach(function (n) { return _this._loadLink(n); });
             requestAnimationFrame(_this.monitor);
@@ -15,7 +17,7 @@ var Watcher = (function () {
             var imported = evt.detail;
             var DOM = imported["data-imported"];
             var scripts = DOM.querySelectorAll('script');
-            var styles = document.querySelector('link[rel="stylesheet"]');
+            var styles = document.querySelector('link[rel="stylesheet"], style');
             imported.parentNode.replaceChild(DOM, imported);
             slice.call(styles).forEach(function (l) { return document.head.appendChild(l); });
             [].slice.call(scripts).forEach(_this._moveScriptTag);
@@ -39,10 +41,11 @@ var Watcher = (function () {
         var _this = this;
         var path = link.getAttribute('data-import');
         this.getRemote(path).then(function (ok) {
-            var doc = _this._getDocumentFor(ok);
-            doc["watcher"] = new Watcher(doc);
-            doc["watcher"].monitor();
-            link["data-imported"] = doc;
+            var fn = _this._loadResponse;
+            if (Watcher.fn["responseLoader"]) {
+                fn = Watcher.fn["responseLoader"];
+            }
+            link["data-imported"] = fn.call(_this, path, ok);
             _this.informLoaded(link);
         }, function (error) {
             console.error("XHR failed.", error);
@@ -75,22 +78,29 @@ var Watcher = (function () {
             request = null;
         });
     };
-    Watcher.prototype._getDocumentFor = function (imported) {
-        var df = document.createDocumentFragment();
-        var parent = document.createElement('import');
-        parent["id"] = 'import-' + Date.now() + rando() + rando() + rando();
-        df.appendChild(parent);
-        parent.innerHTML = imported;
-        return df;
-    };
     Watcher.prototype.informLoaded = function (link) {
         var evt = new CustomEvent('importResolved', {
             detail: link
         });
         document.documentElement.dispatchEvent(evt);
     };
+    Watcher.prototype._loadResponse = function (path, response) {
+        var type = PathTypeSniffer_1.default.getType(path);
+        if (type === 'html') {
+            return this._injector.loadMarkup(response);
+        }
+        if (type === 'js') {
+            return this._injector.loadJS(response);
+        }
+        if (type === 'css') {
+            return this._injector.loadCSS(response);
+        }
+    };
     return Watcher;
 }());
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Watcher;
-//# sourceMappingURL=Watcher.js.map
+Watcher.fn = (_a = {},
+    _a["responseLoader"] = null,
+    _a);
+var _a;

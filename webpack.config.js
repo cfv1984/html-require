@@ -10,8 +10,27 @@ module.exports = {
   },
   plugins: [
     new webpack.optimize.UglifyJsPlugin({
-      compress: true,
-      sourcemaps: true
+      compress: {
+        warnings: false,
+        dead_code: true,
+        conditionals: true,
+        comparisons: true,
+        evaluate: true,
+        booleans: true,
+        unused: true,
+        loops: true,
+        hoist_funs: true,
+        cascade: true,
+        if_return: true,
+        join_vars: true,
+      },
+      mangle: {
+        toplevel: true,
+        sort: true,
+        eval: true,
+        properties: true
+      },
+      sourcemaps: false,
     })
   ],
   module: {
