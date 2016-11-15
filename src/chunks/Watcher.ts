@@ -1,15 +1,20 @@
-type LinkList = Array<HTMLLinkElement>;
+import PathTypeSniffer  from "./util/PathTypeSniffer";
+import ResourceInjector from "./util/ResourceInjector";
 
-type XHROptions = {
-  json?: boolean;
-};
+type LinkList = Array<HTMLLinkElement>;
+type XHROptions = { json?: boolean };
+type FunctionBag = {[name:string]: (...args:any[]) => any};
 
 var slice = [].slice;
 
-var rando = () => Math.ceil(Math.random()*1024);
-
 export default class Watcher
 {
+  static fn: FunctionBag = {
+    ["responseLoader"]:  null
+  };
+
+  private _injector = new ResourceInjector();
+
   constructor(public root:Node, private _resolved:LinkList = [])
   {
     if(!document.documentElement["import-listener"]){
@@ -24,7 +29,6 @@ export default class Watcher
     requestAnimationFrame(this.monitor);
   };
 
-
   private _getUnresolvedLinks(){
     return slice.call(document.querySelectorAll('[data-import]')).filter(n => !n.hasAttribute('data-import-resolved'));
   }
@@ -33,10 +37,13 @@ export default class Watcher
     const path = link.getAttribute('data-import');
     this.getRemote(path).then(
       ok => {
-        var doc = this._getDocumentFor(ok);
-        doc["watcher"] = new Watcher(doc);
-        doc["watcher"].monitor();
-        link["data-imported"] = doc;
+        let fn = this._loadResponse;
+        if(Watcher.fn["responseLoader"]){
+          fn = Watcher.fn["responseLoader"];
+        }
+
+        link["data-imported"] = fn.call(this, path, ok);
+
         this.informLoaded(link);
       },
       error => {
@@ -78,16 +85,6 @@ export default class Watcher
     });
   }
 
-  private _getDocumentFor(imported): DocumentFragment
-  {
-    const df     = document.createDocumentFragment();
-    const parent = document.createElement('import');
-    parent["id"] = 'import-' + Date.now()+ rando() + rando() + rando();
-    df.appendChild(parent);
-    parent.innerHTML = imported;
-    return df;
-  }
-
   public informLoaded(link){
     const evt = new CustomEvent('importResolved', {
       detail: link
@@ -100,13 +97,26 @@ export default class Watcher
     const imported = evt.detail;
     const DOM      = imported["data-imported"];
     const scripts  = DOM.querySelectorAll('script');
-    const styles   = document.querySelector('link[rel="stylesheet"]');
+    const styles   = document.querySelector('link[rel="stylesheet"], style');
     imported.parentNode.replaceChild(DOM, imported);
 
     slice.call(styles).forEach(l=>document.head.appendChild(l));
     [].slice.call(scripts).forEach(this._moveScriptTag);
-
   };
+
+  private _loadResponse(path, response)
+  {
+    const type = PathTypeSniffer.getType(path);
+    if(type === 'html'){
+      return this._injector.loadMarkup(response);
+    }
+    if(type === 'js'){
+      return this._injector.loadJS(response);
+    }
+    if(type === 'css'){
+      return this._injector.loadCSS(response);
+    }
+  }
 
   private _moveScriptTag = (script) =>
   {
