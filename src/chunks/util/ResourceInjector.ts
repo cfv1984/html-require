@@ -39,7 +39,7 @@ export default class ResourceInjector
     const parent = document.createElement('import');
     parent["id"] = 'import-' + Date.now()+ rando() + rando() + rando();
     if(url){
-      parent.setAttribute('import-url', url);
+      parent.setAttribute('data-import-url', url);
     }
     df.appendChild(parent);
     parent.innerHTML = imported;
