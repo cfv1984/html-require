@@ -96,12 +96,12 @@ export default class Watcher
   {
     const imported = evt.detail;
     const DOM      = imported["data-imported"];
-    const scripts  = DOM.querySelectorAll('script');
-    const styles   = document.querySelector('link[rel="stylesheet"], style');
+    const scripts  = DOM.querySelectorAll('script') || [];
+    const styles   = DOM.querySelectorAll('link[rel="stylesheet"], style')||[];
     imported.parentNode.replaceChild(DOM, imported);
 
     slice.call(styles).forEach(l=>document.head.appendChild(l));
-    [].slice.call(scripts).forEach(this._moveScriptTag);
+    slice.call(scripts).forEach(this._moveScriptTag);
   };
 
   private _loadResponse(path, response)

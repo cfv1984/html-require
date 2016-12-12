@@ -3,9 +3,9 @@ var rando = () => Math.ceil(Math.random()*1024);
 export default class ResourceInjector
 {
 
-  public loadMarkup(loaded): Document|DocumentFragment
+  public loadMarkup(loaded, path): Document|DocumentFragment
   {
-    var doc = this._getDocumentFor(loaded);
+    var doc = this._getDocumentFor(loaded, path);
     return doc;
   }
 
@@ -33,11 +33,14 @@ export default class ResourceInjector
   }
 
 
-  private _getDocumentFor(imported): DocumentFragment
+  private _getDocumentFor(imported, url?:string): DocumentFragment
   {
     const df     = document.createDocumentFragment();
     const parent = document.createElement('import');
     parent["id"] = 'import-' + Date.now()+ rando() + rando() + rando();
+    if(url){
+      parent.setAttribute('data-import-url', url);
+    }
     df.appendChild(parent);
     parent.innerHTML = imported;
     return df;
