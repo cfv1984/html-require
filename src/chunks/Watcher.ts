@@ -109,7 +109,7 @@ export default class Watcher
     const type = PathTypeSniffer.getType(path);
     let node;
     if(type === 'html'){
-      node = this._injector.loadMarkup(response);
+      node = this._injector.loadMarkup(response, path);
     }
     if(type === 'js'){
       node = this._injector.loadJS(response);

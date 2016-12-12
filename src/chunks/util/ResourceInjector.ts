@@ -3,7 +3,7 @@ var rando = () => Math.ceil(Math.random()*1024);
 export default class ResourceInjector
 {
 
-  public loadMarkup(loaded, path): Document|DocumentFragment
+  public loadMarkup(loaded, path?): Document|DocumentFragment
   {
     var doc = this._getDocumentFor(loaded, path);
     return doc;
